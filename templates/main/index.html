@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        {% block title %}<title>Тестовая страница</title>{% endblock %}
+        {% load static %}
+        <link href="{% static 'main/css/style.css' %}" rel="stylesheet" type="text/css">
+        {% load static %}
+        <link rel="shortcut icon" type="image/png" href="{% static 'main/images/favicon.ico' %}"/>
+    </head>
+    <body>
+        <p id="username">{{ user.username }}</p>
+        <a id="logout" href="{% url 'logout' %}">logout</a>
+        <h1>MAIN</h1>
+        {% if bot_list %}
+            <table class="bot_list">
+                <tbody>
+                    <tr>
+                        <td>Bot name</td><td>Last update</td><td>Status</td><td>Action</td>
+                    </tr>
+                    {% for bot in bot_list %}
+                    <tr>
+                        <td id="name{{ forloop.counter0 }}"></td>
+                        <td id="last_update{{ forloop.counter0 }}"></td>
+                        <td id="status{{ forloop.counter0 }}"></td>
+                        <td>
+                            <input type="button" id="stop{{ forloop.counter0 }}" class="stop" onclick="javascript:onstop({{ forloop.counter0 }})" value="Остановить"></input>
+                            <input type="button" id="start{{ forloop.counter0 }}" class="start" onclick="javascript:onstart({{ forloop.counter0 }})" value="Запустить"></input>
+                            <input type="button" id="ondebug{{ forloop.counter0 }}" class="ondebug" onclick="javascript:ondebug({{ forloop.counter0 }})" value="Дебаг вкл"></input>
+                            <input type="button" id="offdebug{{ forloop.counter0 }}" class="offdebug" onclick="javascript:offdebug({{ forloop.counter0 }})" value="Дебаг выкл"></input>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+        <p>Нет ботов</p>
+        {% endif %}
+        <p id="error"></p>
+        {% load static %}
+        <script src="{% static 'main/scripts/main.js' %}"></script>
+        <table class="statuses">
+            <tbody>
+                <tr>
+                    <td>ON</td><td>Бот работает</td>    
+                </tr>
+                <tr>
+                    <td>OFF</td><td>Бот не работает</td>
+                </td>
+                <tr>
+                    <td>NOT_AVAILABLE</td><td>Бот не может запуститься</td>
+                </td>
+                <tr>
+                    <td>DEBUG_ON</td><td>Бот работает, включен дебаг режим</td>
+                </td>
+                <tr>
+                    <td>DEBUG_OFF</td><td>Бот не работает, включен дебаг режим</td>
+                </td>
+            </tbody>
+        </table>
+        <p id="info">Выключие бота НЕ в ДЕБАГ режиме только перезагрузит его.</p>   
+    </body>
+    
+</html>

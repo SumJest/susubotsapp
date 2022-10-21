@@ -1,0 +1,90 @@
+html {
+    font-size: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: lightgray;
+}
+body{
+    width: 600px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 0 20px 20px 20px;
+    border: 0;
+}
+h1{
+    margin: 0;
+    padding: 20px 0;
+    color:  rgb(54, 54, 54);
+    text-align: center;
+}
+#change_status_button {
+    margin: 0 auto;
+    background-color: rgb(192, 189, 189);
+    border: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    width: 200px;
+    height: 30px;
+    margin: 0 auto;
+    display: block;
+}
+#change_status_button:hover {background: rgb(204, 204, 204);}
+#change_status_button:active{background: rgb(95, 95, 95);}
+#status
+{
+    color: rgb(216, 31, 31);
+    font-weight: 600;
+}
+.bot_block
+{
+    padding: 8px 12px;
+}
+th, td {
+    padding: 5px 15px;
+ }
+ #username
+ {
+    padding-top: 10px;
+ }
+ #username, #logout
+{
+    font-size: 16px;
+    letter-spacing: 1px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    display: block;
+}
+#error
+{
+    color: rgb(216, 31, 31);
+    font-weight: 600; 
+}
+#info
+{
+    font-size: 10pt;
+}
+table.statuses
+{
+    font-size: 10pt;
+}
+/*
+input.stop
+{
+    background-color: #f44336;
+    border: none;
+    display: inline-block;
+    size: 5px;
+}
+input.stop:hover{background: rgb(211, 30, 30);}
+input.stop:active{background: rgb(110, 28, 28);}
+input.start
+{
+    background-color: #089c15;
+    border: none;
+    display: inline-block;
+    size: 5px;
+}
+input.start:hover{background: rgb(6, 177, 14);}
+input.start:active{background: rgb(5, 99, 9);}*/

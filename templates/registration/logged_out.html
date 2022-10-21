@@ -1,0 +1,13 @@
+<head>
+    <meta charset="utf-8">
+    {% block title %}<title>Тестовая страница</title>{% endblock %}
+    {% load static %}
+    <link href="{% static 'registration/css/logout.css' %}" rel="stylesheet" type="text/css">
+    {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'main/images/favicon.ico' %}"/>
+  </head>
+{% block content %}
+<p>Logged out!</p>
+
+<a href="{% url 'login'%}">Click here to login again.</a>
+{% endblock %}
