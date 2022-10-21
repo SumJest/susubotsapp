@@ -326,6 +326,7 @@ class APIget:
 def api(request: HttpRequest, function: str):
     to_call: typing.Callable = None
     session_id = None
+    print(request.headers)
     try:
         session_id = request.COOKIES['sessionid']
     except Exception:

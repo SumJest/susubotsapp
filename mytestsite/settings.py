@@ -18,13 +18,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = open("secret.txt",'r').read()
+SECRET_KEY = open("secret.txt", 'r').read()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["88.206.13.212", "localhost", "127.0.0.1", "109.191.128.13", "bots.sumjest.ru"]
-
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -88,7 +87,6 @@ AUTHENTICATION_BACKENDS = (
 
 WSGI_APPLICATION = 'mytestsite.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
@@ -100,7 +98,7 @@ DATABASES = {
 }
 
 SOCIAL_AUTH_VK_OAUTH2_KEY = '51451526'
-SOCIAL_AUTH_VK_OAUTH2_SECRET = '1RN0PC2PgG9dfwlU3BNB'
+SOCIAL_AUTH_VK_OAUTH2_SECRET = open(f'{BASE_DIR}/vk_secret.txt', 'r')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -120,7 +118,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -132,16 +129,14 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_ROOT = ''
 
-
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
@@ -152,4 +147,4 @@ LOGIN_REDIRECT_URL = '/'
 AUTH_USER_MODEL = "api.CustomUser"
 
 CSRF_COOKIE_SECURE = False
-APPEND_SLASH=False
+APPEND_SLASH = False
