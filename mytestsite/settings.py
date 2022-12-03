@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'login.apps.LoginConfig',
     'api.apps.ApiConfig',
+    'botform.apps.BotformConfig'
 ]
 #
 MIDDLEWARE = [
@@ -55,14 +56,12 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'mytestsite.urls'
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8000',
-    'http://88.206.13.212:8000',
-    'http://127.0.0.1:8000',
-    'http://localhost',
-    'http://109.191.128.13',
-    'http://127.0.0.1'
+    'http://bots.sumjest.ru'
 ]
 
+APPEND_SLASH = False
+
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -96,7 +95,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 SOCIAL_AUTH_VK_OAUTH2_KEY = '51451526'
 SOCIAL_AUTH_VK_OAUTH2_SECRET = open(f'{BASE_DIR}/vk_secret.txt', 'r')
 
@@ -136,7 +134,7 @@ STATIC_ROOT = ''
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), os.path.join(BASE_DIR.parent, "vk-keyboard-master/public"))
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 

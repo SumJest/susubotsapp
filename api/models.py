@@ -13,6 +13,7 @@ def random_string():
 class Bot(models.Model):
     name = models.fields.CharField(max_length=30, default="Noname")
     status = models.fields.CharField(max_length=30, null=True)
+    debug = models.fields.BooleanField(default=False)
     last_update = models.FloatField()
 
     def get_dict(self, *args):
@@ -61,7 +62,6 @@ class Task(models.Model):
         return f"{self.name}"
 
 
-
 class CustomUser(AbstractUser):
     pass
     bots = models.ManyToManyField(Bot, blank=True, help_text=(
@@ -69,3 +69,15 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class Keyboard(models.Model):
+    name = models.CharField(max_length=30)
+    object = models.JSONField()
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
+
+
+class Message(models.Model):
+    name = models.CharField(max_length=30)
+    text = models.TextField()
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE)

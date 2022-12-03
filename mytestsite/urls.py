@@ -20,11 +20,11 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('admin', admin.site.urls),
     # path('login/', include('login.urls')),
     path('social/', include('social_django.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include('main.urls')),
     path('api/<str:function>', include('api.urls')),
-    path('api/<str:function>/', include('api.urls'))
+    path('api/<str:function>/', include('api.urls')),
+    path('bot/<str:botname>/', include('botform.urls'))
 ]

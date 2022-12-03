@@ -1,64 +1,70 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        {% block title %}<title>Тестовая страница</title>{% endblock %}
-        {% load static %}
-        <link href="{% static 'main/css/style.css' %}" rel="stylesheet" type="text/css">
-        {% load static %}
-        <link rel="shortcut icon" type="image/png" href="{% static 'main/images/favicon.ico' %}"/>
-    </head>
-    <body>
-        <p id="username">{{ user.username }}</p>
-        <a id="logout" href="{% url 'logout' %}">logout</a>
-        <h1>MAIN</h1>
-        {% if bot_list %}
-            <table class="bot_list">
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Modal -->
+<div class="modal fade" id="querySentModal" tabindex="-1" role="dialog" aria-labelledby="querySentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="querySentModalLabel">Alert</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            Запрос отправлен!
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">BOTS LIST</h4>
+        <p class="card-description">
+          There are only bots that you have access to
+        </p>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Bot</th>
+                    <th>Last update</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
                 <tbody>
-                    <tr>
-                        <td>Bot name</td><td>Last update</td><td>Status</td><td>Action</td>
-                    </tr>
-                    {% for bot in bot_list %}
-                    <tr>
-                        <td id="name{{ forloop.counter0 }}"></td>
-                        <td id="last_update{{ forloop.counter0 }}"></td>
-                        <td id="status{{ forloop.counter0 }}"></td>
-                        <td>
-                            <input type="button" id="stop{{ forloop.counter0 }}" class="stop" onclick="javascript:onstop({{ forloop.counter0 }})" value="Остановить"></input>
-                            <input type="button" id="start{{ forloop.counter0 }}" class="start" onclick="javascript:onstart({{ forloop.counter0 }})" value="Запустить"></input>
-                            <input type="button" id="ondebug{{ forloop.counter0 }}" class="ondebug" onclick="javascript:ondebug({{ forloop.counter0 }})" value="Дебаг вкл"></input>
-                            <input type="button" id="offdebug{{ forloop.counter0 }}" class="offdebug" onclick="javascript:offdebug({{ forloop.counter0 }})" value="Дебаг выкл"></input>
+                  {% for bot in bot_list %}
+                  <tr>
+                        <td id="bot_name{{ forloop.counter0 }}"></td>
+                        <td id="bot_last_update{{ forloop.counter0 }}"></td>
+                        <td id="bot_status">
+                            <label class="badge badge-warning" id="bot_debug_status{{ forloop.counter0 }}" hidden>DEBUG</label>
+                            <label class="badge badge-danger" id="bot_status_label{{ forloop.counter0 }}"></label>
                         </td>
-                    </tr>
-                    {% endfor %}
+                        <td>
+                            <button type="button" id="start{{ forloop.counter0 }}" class="btn btn-success btn-rounded btn-icon" onclick="javascript:onstart({{ forloop.counter0 }})" title="Turn on bot"><i class="mdi mdi-play-circle-outline"></i></button>
+                            <button type="button" id="stop{{ forloop.counter0 }}" class="btn btn-danger btn-rounded btn-icon" onclick="javascript:onstop({{ forloop.counter0 }})" title="Turn off bot"><i class="mdi mdi-stop"></i></button>
+                            <button type="button" id="ondebug{{ forloop.counter0 }}" class="btn btn-warning btn-rounded btn-icon" onclick="javascript:ondebug({{ forloop.counter0 }})" title="Turn on debug mode"><i class="mdi mdi-bug-play-outline"></i></button>
+                            <button type="button" id="offdebug{{ forloop.counter0 }}" class="btn btn-warning btn-rounded btn-icon" onclick="javascript:offdebug({{ forloop.counter0 }})" title="Turn off debug mode"><i class="mdi mdi-bug-stop-outline"></i></button>
+                            <button type="button" id="settings{{ forloop.counter0 }}" class="btn btn-primary btn-rounded btn-icon" onclick="window.location.href = '/bot/{{ bot.name }}/'" title="Open bot settings"><i class="mdi mdi-cog-outline"></i></button> 
+                        </td>
+                  </tr>
+                  {% endfor %}
                 </tbody>
-            </table>
-        {% else %}
-        <p>Нет ботов</p>
-        {% endif %}
-        <p id="error"></p>
-        {% load static %}
-        <script src="{% static 'main/scripts/main.js' %}"></script>
-        <table class="statuses">
-            <tbody>
-                <tr>
-                    <td>ON</td><td>Бот работает</td>    
-                </tr>
-                <tr>
-                    <td>OFF</td><td>Бот не работает</td>
-                </td>
-                <tr>
-                    <td>NOT_AVAILABLE</td><td>Бот не может запуститься</td>
-                </td>
-                <tr>
-                    <td>DEBUG_ON</td><td>Бот работает, включен дебаг режим</td>
-                </td>
-                <tr>
-                    <td>DEBUG_OFF</td><td>Бот не работает, включен дебаг режим</td>
-                </td>
-            </tbody>
-        </table>
-        <p id="info">Выключие бота НЕ в ДЕБАГ режиме только перезагрузит его.</p>   
-    </body>
-    
-</html>
+              </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  {% endblock %}
+{% block scripts %}
+{% load static %}
+<script src="{% static 'main/scripts/main.js' %}"></script>
+{% endblock %}

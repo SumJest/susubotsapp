@@ -4,7 +4,7 @@ import typing
 from datetime import datetime
 from django.contrib.sessions.models import Session
 
-from .models import Bot, CustomUser, Token, Task
+from .models import Bot, CustomUser, Token, Task, Keyboard, Message
 
 from django.http import JsonResponse, HttpRequest
 from django.views.decorators.csrf import csrf_exempt
@@ -88,11 +88,89 @@ class APIpost:
         if 'status' not in data.keys():
             return {"ok": False, "reason": "No status data"}
         status = data['status']
+        debug = data['debug']
 
         bot.status = status
+        bot.debug = debug
         bot.last_update = datetime.now().timestamp()
         bot.save()
 
+        return {"ok": True}
+
+    @staticmethod
+    def updatekeyboard(**kwargs):
+        if 'session_id' not in kwargs.keys():
+            return {"ok": False, "reason": "You should be authenticated"}
+        if 'bot_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify bot name"}
+        if 'keyboard_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify keyboard name"}
+        if 'data' not in kwargs.keys():
+            return {"ok": False, "reason": "No post data"}
+
+        bot: Bot = None
+        data = kwargs['data']
+        bot_name = kwargs['bot_name'][0]
+        keyboard_name = kwargs['keyboard_name'][0]
+
+        try:
+            session_data = Session.objects.get(session_key=kwargs['session_id']).get_decoded()
+            user = CustomUser.objects.get(id=session_data['_auth_user_id'])
+            if user.is_superuser or is_ingroup(user, "Admin"):
+                bot_object = Bot.objects
+            else:
+                bot_object = user.bots
+
+            bot = bot_object.get(name=bot_name)
+        except Exception as ex:
+            pass
+        if bot is None:
+            return {"ok": False, "reason": "You don't have permisson or bot doesn't exist"}
+
+        try:
+            keyboard = Keyboard.objects.get(name=keyboard_name, bot=bot)
+            keyboard.object = data
+        except:
+            keyboard = Keyboard.objects.create(name=keyboard_name, bot=bot, object=data)
+        keyboard.save()
+        return {"ok": True}
+
+    @staticmethod
+    def updatemessage(**kwargs):
+        if 'session_id' not in kwargs.keys():
+            return {"ok": False, "reason": "You should be authenticated"}
+        if 'bot_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify bot name"}
+        if 'message_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify keyboard name"}
+        if 'data' not in kwargs.keys():
+            return {"ok": False, "reason": "No post data"}
+
+        bot: Bot = None
+        data = kwargs['data']
+        bot_name = kwargs['bot_name'][0]
+        message_name = kwargs['message_name'][0]
+
+        try:
+            session_data = Session.objects.get(session_key=kwargs['session_id']).get_decoded()
+            user = CustomUser.objects.get(id=session_data['_auth_user_id'])
+            if user.is_superuser or is_ingroup(user, "Admin"):
+                bot_object = Bot.objects
+            else:
+                bot_object = user.bots
+
+            bot = bot_object.get(name=bot_name)
+        except Exception as ex:
+            pass
+        if bot is None:
+            return {"ok": False, "reason": "You don't have permisson or bot doesn't exist"}
+
+        try:
+            message = Message.objects.get(name=message_name, bot=bot)
+            message.text = data["message_text"]
+        except:
+            message = Message.objects.create(name=message_name, bot=bot, text=data["message_text"])
+        message.save()
         return {"ok": True}
 
     @staticmethod
@@ -151,7 +229,7 @@ class APIget:
     @staticmethod
     def gettime(**kwargs):
         return {"ok": True,
-                "result": {
+                "data": {
                     "time": datetime.now().timestamp()
                 }}
 
@@ -207,6 +285,7 @@ class APIget:
             task.save()
         response = {"ok": True, "tasks": tasks_list}
         return response
+
 
     @staticmethod
     def getbot(**kwargs):
@@ -283,7 +362,7 @@ class APIget:
                 return {"ok": False, "reason": "Bad request"}
         bot_list = []
         for bot in bots:
-            bot_list.append(bot.get_dict('name', 'last_update', 'status'))
+            bot_list.append(bot.get_dict('name', 'last_update', 'status', 'debug'))
         response = {"ok": True, "result": bot_list}
         return response
 
@@ -319,6 +398,183 @@ class APIget:
             task.sended = True
             task.save()
         return {"ok": True, "response": response_data}
+    @staticmethod
+    def getkeyboard(**kwargs):
+        if 'session_id' not in kwargs.keys() and 'token' not in kwargs.keys():
+            return {"ok": False, "reason": "You should be authenticated"}
+        if 'bot_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify bot name"}
+        if 'keyboard_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify keyboard name"}
+
+
+        bot: Bot = None
+        bot_name = kwargs['bot_name'][0]
+        keyboard_name = kwargs['keyboard_name'][0]
+
+        if 'token' in kwargs.keys():
+
+            token_name = kwargs['token'][0]
+            try:
+                token = Token.objects.get(name=token_name)
+                if token.is_supertoken:
+                    bots = Bot.objects.all()
+                else:
+                    bots = token.bots.all()
+                bot = bots.get(name=bot_name)
+            except Exception:
+                print(traceback.format_exc())
+                return {"ok": False, "reason": "Bad token"}
+
+        elif 'session_id' in kwargs.keys():
+            try:
+                session_data = Session.objects.get(session_key=kwargs['session_id']).get_decoded()
+                user = CustomUser.objects.get(id=session_data['_auth_user_id'])
+                if user.is_superuser or is_ingroup(user, "Admin"):
+                    bots = Bot.objects.all()
+                else:
+                    bots = user.bots.all()
+                bot = bots.get(name=bot_name)
+            except Exception:
+                return {"ok": False, "reason": "Bad request"}
+
+        if bot is None:
+            return {"ok": False, "reason": "Bad bot"}
+
+        keyboard = None
+        try:
+            keyboard = Keyboard.objects.get(name=keyboard_name, bot=bot)
+        except:
+            return {"ok": False, "reason": "Bad keyboard name"}
+
+        return {"ok": True, "data": keyboard.object}
+
+    @staticmethod
+    def getmessage(**kwargs):
+        if 'session_id' not in kwargs.keys() and 'token' not in kwargs.keys():
+            return {"ok": False, "reason": "You should be authenticated"}
+        if 'bot_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify bot name"}
+        if 'message_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify keyboard name"}
+
+
+        bot: Bot = None
+        bot_name = kwargs['bot_name'][0]
+        message_name = kwargs['message_name'][0]
+
+        if 'token' in kwargs.keys():
+
+            token_name = kwargs['token'][0]
+            try:
+                token = Token.objects.get(name=token_name)
+                if token.is_supertoken:
+                    bots = Bot.objects.all()
+                else:
+                    bots = token.bots.all()
+                bot = bots.get(name=bot_name)
+            except Exception:
+                print(traceback.format_exc())
+                return {"ok": False, "reason": "Bad token"}
+
+        elif 'session_id' in kwargs.keys():
+            try:
+                session_data = Session.objects.get(session_key=kwargs['session_id']).get_decoded()
+                user = CustomUser.objects.get(id=session_data['_auth_user_id'])
+                if user.is_superuser or is_ingroup(user, "Admin"):
+                    bots = Bot.objects.all()
+                else:
+                    bots = user.bots.all()
+                bot = bots.get(name=bot_name)
+            except Exception:
+                return {"ok": False, "reason": "Bad request"}
+
+        if bot is None:
+            return {"ok": False, "reason": "Bad bot"}
+
+        message = None
+        try:
+            message = Message.objects.get(name=message_name, bot=bot)
+        except:
+            return {"ok": False, "reason": "Bad message name"}
+
+        return {"ok": True, "data": message.text}
+
+    @staticmethod
+    def deletekeyboard(**kwargs):
+        if 'session_id' not in kwargs.keys():
+            return {"ok": False, "reason": "You should be authenticated"}
+        if 'bot_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify bot name"}
+        if 'keyboard_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify keyboard name"}
+
+
+        bot: Bot = None
+        bot_name = kwargs['bot_name'][0]
+        keyboard_name = kwargs['keyboard_name'][0]
+
+        try:
+            session_data = Session.objects.get(session_key=kwargs['session_id']).get_decoded()
+            user = CustomUser.objects.get(id=session_data['_auth_user_id'])
+            if user.is_superuser or is_ingroup(user, "Admin"):
+                bots = Bot.objects.all()
+            else:
+                bots = user.bots.all()
+            bot = bots.get(name=bot_name)
+        except Exception:
+            return {"ok": False, "reason": "Bad request"}
+
+        if bot is None:
+            return {"ok": False, "reason": "Bad bot"}
+
+        keyboard = None
+        try:
+            keyboard = Keyboard.objects.get(name=keyboard_name, bot=bot)
+        except:
+            return {"ok": False, "reason": "Bad keyboard name"}
+
+        keyboard.delete()
+
+        return {"ok": True}
+
+    @staticmethod
+    def deletemessage(**kwargs):
+        if 'session_id' not in kwargs.keys():
+            return {"ok": False, "reason": "You should be authenticated"}
+        if 'bot_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify bot name"}
+        if 'message_name' not in kwargs.keys():
+            return {"ok": False, "reason": "You should specify keyboard name"}
+
+
+        bot: Bot = None
+        bot_name = kwargs['bot_name'][0]
+        message_name = kwargs['message_name'][0]
+
+        try:
+            session_data = Session.objects.get(session_key=kwargs['session_id']).get_decoded()
+            user = CustomUser.objects.get(id=session_data['_auth_user_id'])
+            if user.is_superuser or is_ingroup(user, "Admin"):
+                bots = Bot.objects.all()
+            else:
+                bots = user.bots.all()
+            bot = bots.get(name=bot_name)
+        except Exception:
+            return {"ok": False, "reason": "Bad request"}
+
+        if bot is None:
+            return {"ok": False, "reason": "Bad bot"}
+
+        message = None
+        try:
+            message = Message.objects.get(name=message_name, bot=bot)
+        except:
+            return {"ok": False, "reason": "Bad message name"}
+
+        message.delete()
+
+        return {"ok": True}
 
 
 # Create your views here.
@@ -326,7 +582,6 @@ class APIget:
 def api(request: HttpRequest, function: str):
     to_call: typing.Callable = None
     session_id = None
-    print(request.headers)
     try:
         session_id = request.COOKIES['sessionid']
     except Exception:
@@ -344,5 +599,5 @@ def api(request: HttpRequest, function: str):
     if to_call is None:
         return JsonResponse({"ok": False,
                              "error_code": 404,
-                             "description": "Function not found"})
+                             "reason": "Function not found"})
     return JsonResponse(data)
